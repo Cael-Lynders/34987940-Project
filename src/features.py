@@ -5,6 +5,13 @@ import pandas as pd
 def build_feature_table(coco_data, split_name, categories):
     """Convert one split's COCO annotation data into a per-image feature table.
 
+    EXPERIMENTAL VERSION (branch: feature/alt-severity-score): severity_score
+    is computed as the TOTAL bounding-box area across all detections in an
+    image, rather than the mean. This weights images with many small defects
+    more heavily than the mean-based version does, since it doesn't average
+    out multiple detections -- testing whether this changes model behaviour
+    or performance compared to the mean-based definition used on main.
+
     Parameters
     ----------
     coco_data : dict
@@ -40,10 +47,8 @@ def build_feature_table(coco_data, split_name, categories):
             'twisted_meat_count': class_names.count('twisted-meat'),
             'unsealed_count': class_names.count('unsealed'),
             'wrinkle_count': class_names.count('wrinkle'),
-            'severity_score': (
-                sum(a['bbox'][2] * a['bbox'][3] for a in anns) / len(anns)
-                if anns else 0
-            ),
+            # CHANGED: total area, not mean area (compare against main)
+            'severity_score': sum(a['bbox'][2] * a['bbox'][3] for a in anns),
         }
         rows.append(row)
 
