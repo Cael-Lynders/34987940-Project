@@ -1,7 +1,7 @@
 
 import pytest
 import pandas as pd
-from src.features import build_feature_table  # adjust import to your structure
+from src.features import build_feature_table
 
 
 def test_build_feature_table_row_count_matches_images():
@@ -9,9 +9,9 @@ def test_build_feature_table_row_count_matches_images():
     fake_coco = {
         'images': [{'id': 1, 'file_name': 'a.jpg'}, {'id': 2, 'file_name': 'b.jpg'}],
         'annotations': [{'image_id': 1, 'category_id': 0, 'bbox': [0, 0, 10, 10]}],
-        'categories': [{'id': 0, 'name': 'wrinkle'}],
     }
-    result = build_feature_table(fake_coco, 'test')
+    categories = {0: 'wrinkle'}
+    result = build_feature_table(fake_coco, 'test', categories)
     assert len(result) == 2
 
 
@@ -20,9 +20,9 @@ def test_build_feature_table_zero_annotations_gives_zero_severity():
     fake_coco = {
         'images': [{'id': 1, 'file_name': 'a.jpg'}],
         'annotations': [],
-        'categories': [],
     }
-    result = build_feature_table(fake_coco, 'test')
+    categories = {}
+    result = build_feature_table(fake_coco, 'test', categories)
     assert result.loc[0, 'severity_score'] == 0
 
 
@@ -32,7 +32,7 @@ def test_build_feature_table_rejects_missing_categories():
     fake_coco = {
         'images': [{'id': 1, 'file_name': 'a.jpg'}],
         'annotations': [{'image_id': 1, 'category_id': 99, 'bbox': [0, 0, 1, 1]}],
-        'categories': [{'id': 0, 'name': 'wrinkle'}],
     }
+    categories = {0: 'wrinkle'}  # category 99 deliberately missing
     with pytest.raises(KeyError):
-        build_feature_table(fake_coco, 'test')
+        build_feature_table(fake_coco, 'test', categories)
