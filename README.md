@@ -10,7 +10,7 @@ Rather than a binary pass/fail decision, the model outputs a graded severity sco
 
 - **Input:** per-image defect counts (total detections plus counts for `loose-meat`, `packaging-error`, `twisted-meat`, `unsealed`, `wrinkle`), derived from the bounding-box annotations of the Roboflow dataset *pork-rasher-error-packaging* (workspace `hello-2aqe0`, CC BY 4.0, Version 4).
 - **Output:** `severity_score`, the mean bounding-box area (pixel²) of all annotated defects in an image (0 if none).
-- **Methods compared:** mean-prediction baseline, decision tree regression, SVR (RBF), and neural network regression, evaluated with MAE, RMSE and R², 5-fold cross-validation, runtime and memory profiling, and hyperparameter tuning (`GridSearchCV`).
+- **Methods compared:** mean-prediction baseline, decision tree regression, SVR (RBF), and neural network regression, evaluated with MAE, RMSE and R², group-aware 5-fold cross validation, runtime and memory profiling, and hyperparameter tuning (`GridSearchCV`).
 - **Validation:** the dataset's predefined train/valid/test splits, a mean baseline, residual diagnostics and failure-mode analysis. Validation is against the dataset's own annotations, not independently verified inspection outcomes.
 
 ## Repository structure
@@ -37,7 +37,7 @@ The project is designed to run in Google Colab.
    ```
    Core packages: `roboflow`, `scikit-learn`, `pandas`, `numpy`, `matplotlib`, `pytest`, `pdoc`.
 4. **Run the notebook top to bottom** (Runtime > Run all). It will:
-   - connect to Roboflow and download Version 4 of the dataset in COCO format (into the Colab runtime, not the repo)
+   - connect to Roboflow and download Version 4 of the dataset in COCO format (downloaded into data/ (git-ignored, not committed))
    - build per-image feature tables for the train/valid/test splits
    - train and compare the candidate models, run cross-validation and tuning, and produce residual and failure-mode diagnostics
 5. **Set your git identity** if committing from a fresh Colab session:
@@ -58,7 +58,7 @@ python -m pytest tests/ -v
 
 ```
 pip install pdoc
-pdoc --html src -o docs
+pdoc src -o docs
 ```
 
 ## Data and licence
