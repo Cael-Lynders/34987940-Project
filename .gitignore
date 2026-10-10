@@ -1,7 +1,12 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
-data/*
-!data/.gitkeep
+.pytest_cache/
 .env
 *.token
+*.zip
+
+# Dataset is downloaded at runtime by the notebook and is never committed
+data/*
+!data/.gitkeep
+Pork-Rasher-Error*/
