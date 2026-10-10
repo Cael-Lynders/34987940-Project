@@ -1,3 +1,8 @@
+"""Feature engineering for the pork-rasher packaging-defect dataset.
+
+Converts Roboflow COCO annotations into one row per image: per-class defect
+counts (model inputs) and a continuous ``severity_score`` (the target).
+"""
 from collections import defaultdict
 import pandas as pd
 

@@ -1,0 +1,7 @@
+roboflow
+scikit-learn
+pandas
+numpy
+matplotlib
+pytest
+pdoc
