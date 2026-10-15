@@ -11,4 +11,4 @@ tests/test_features.py::test_build_feature_table_rejects_missing_categories PASS
 tests/test_features.py::test_severity_is_mean_of_box_areas PASSED        [ 80%]
 tests/test_features.py::test_class_counts_match_annotations PASSED       [100%]
 
-============================== 5 passed in 0.49s ===============================
+============================== 5 passed in 0.45s ===============================
