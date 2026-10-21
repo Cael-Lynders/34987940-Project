@@ -16,7 +16,7 @@ Rather than a binary pass/fail decision, the model outputs a graded severity sco
 ## Repository structure
 
 ```
-notebooks/   Main Colab notebook (34987940_Project.ipynb)
+notebooks/   Main Colab notebook (34987940_Project_Final.ipynb)
 src/         Reusable code (features.py: build_feature_table)
 tests/       pytest tests and saved test report
 docs/        Generated HTML documentation and diagnostic plots
@@ -27,7 +27,7 @@ data/        Placeholder only; the dataset is downloaded at runtime and not comm
 
 The project is designed to run in Google Colab.
 
-1. **Open the notebook** `notebooks/34987940_Project.ipynb` in Google Colab.
+1. **Open the notebook** `notebooks/34987940_Project_Final.ipynb` in Google Colab.
 2. **Add Colab Secrets** (key icon in the left sidebar, with notebook access enabled):
    - `GH_PAT`: a GitHub personal access token (only needed for cloning or pushing to a private repo)
    - `ROBO_API`: your Roboflow API key (Roboflow Settings > API Keys)
