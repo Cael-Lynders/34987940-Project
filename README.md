@@ -64,3 +64,35 @@ pdoc src -o docs
 ## Data and licence
 
 The dataset is not included in this repository. It is downloaded at runtime from Roboflow Universe under CC BY 4.0. Code in this repository is released under the licence in `LICENSE`.
+
+## Inputs and outputs
+
+| Item | Name | Format | Units and domain | Meaning |
+| --- | --- | --- | --- | --- |
+| Input | `num_detections` | integer | count, 0 or more | Total annotated defects in the image |
+| Input | `loose_meat_count` | integer | count, 0 or more | Defects of class `loose-meat` |
+| Input | `packaging_error_count` | integer | count, 0 or more | Defects of class `packaging-error` |
+| Input | `twisted_meat_count` | integer | count, 0 or more | Defects of class `twisted-meat` |
+| Input | `unsealed_count` | integer | count, 0 or more | Defects of class `unsealed` |
+| Input | `wrinkle_count` | integer | count, 0 or more | Defects of class `wrinkle` |
+| Output | `severity_score` | float, one per image | pixels², 0 to 388,800 (a 720×540 image) | Mean bounding-box area of the image's annotated defects; 0 if there are none |
+
+The inputs are built by `build_feature_table` in `src/features.py` from the COCO annotation file of each dataset split. The score is never used as an input.
+
+**Invalid or missing input**
+
+- A class name missing from the dataset's categories raises a `KeyError`, so a count is never silently set to zero (covered by a test).
+- An image with no annotations is kept and given a severity score of 0 (covered by a test).
+
+## Acceptance criteria
+
+The ground truth is the severity score computed from the dataset's own annotations, so these criteria show consistency with the labels, not agreement with real inspectors.
+
+| # | Criterion | Result | Met |
+| --- | --- | --- | --- |
+| 1 | All pytest tests pass (`python -m pytest`), including a known-answer test: boxes of 10×10 and 20×20 give a severity of 250 | 5 of 5 pass (`tests/test_report.txt`) | Yes |
+| 2 | Validation MAE (120 images) beats the mean baseline by more than the fold-to-fold spread of group-aware cross-validation | 11,329 vs 24,085; spread ± 382 | Yes |
+| 3 | Test MAE (80 withheld images, scored once) is below the test baseline | 10,406 vs 19,568 | Yes |
+| 4 | Validation MAE beats a two-rule benchmark (0 if the image has no detections, otherwise the mean of the non-zero training scores) | 11,329 vs 20,738 | Yes |
+
+MAE is in pixels². Known limits: the counts carry no defect size, so images with the same counts receive the same prediction, and the validation and test sets are small (120 and 80 images).
