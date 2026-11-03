@@ -85,49 +85,35 @@ counts (model inputs) and a continuous <code>severity_score</code> (the target).
 </span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">    pandas.DataFrame</span>
 </span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        One row per image, with per-class defect counts as input features</span>
 </span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">        and a continuous 'severity_score' target column.</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    Raises</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">    ------</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">    KeyError</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">        If an annotation's category_id is not in ``categories``.</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">    """</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>    <span class="c1"># Start from the image list so images with no annotations still get a row.</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="n">image_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">img</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]:</span> <span class="n">img</span><span class="p">[</span><span class="s1">'file_name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'images'</span><span class="p">]}</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>    <span class="c1"># Group annotations by image so each image's boxes are counted together.</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>    <span class="n">anns_by_image</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'annotations'</span><span class="p">]:</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="n">anns_by_image</span><span class="p">[</span><span class="n">ann</span><span class="p">[</span><span class="s1">'image_id'</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="k">for</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">image_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>        <span class="c1"># An image with no annotations gets an empty list, not a missing key.</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="n">anns</span> <span class="o">=</span> <span class="n">anns_by_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="p">[])</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>        <span class="c1"># Convert ids to class names; an unknown id raises KeyError instead of</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>        <span class="c1"># being silently ignored.</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s1">'category_id'</span><span class="p">]]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">]</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>        <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>            <span class="s1">'image'</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>            <span class="s1">'split'</span><span class="p">:</span> <span class="n">split_name</span><span class="p">,</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>            <span class="s1">'num_detections'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">),</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>            <span class="s1">'loose_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'loose-meat'</span><span class="p">),</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>            <span class="s1">'packaging_error_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'packaging-error'</span><span class="p">),</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>            <span class="s1">'twisted_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'twisted-meat'</span><span class="p">),</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>            <span class="s1">'unsealed_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'unsealed'</span><span class="p">),</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>            <span class="s1">'wrinkle_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'wrinkle'</span><span class="p">),</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a>            <span class="c1"># Severity is the MEAN box area in pixels^2, not the total (mean</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a>            <span class="c1"># scored better in the branch experiment). A COCO bbox is</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a>            <span class="c1"># [x, y, width, height], so index 2 * index 3 is the area.</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a>            <span class="c1"># No annotations means no defects, so the score is 0.</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a>            <span class="s1">'severity_score'</span><span class="p">:</span> <span class="p">(</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>                <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">)</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>                <span class="k">if</span> <span class="n">anns</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>            <span class="p">),</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>        <span class="p">}</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">    """</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>    <span class="n">image_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">img</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]:</span> <span class="n">img</span><span class="p">[</span><span class="s1">'file_name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'images'</span><span class="p">]}</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>    <span class="n">anns_by_image</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'annotations'</span><span class="p">]:</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>        <span class="n">anns_by_image</span><span class="p">[</span><span class="n">ann</span><span class="p">[</span><span class="s1">'image_id'</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>    <span class="k">for</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">image_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>        <span class="n">anns</span> <span class="o">=</span> <span class="n">anns_by_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s1">'category_id'</span><span class="p">]]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">]</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>            <span class="s1">'image'</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>            <span class="s1">'split'</span><span class="p">:</span> <span class="n">split_name</span><span class="p">,</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>            <span class="s1">'num_detections'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">),</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>            <span class="s1">'loose_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'loose-meat'</span><span class="p">),</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>            <span class="s1">'packaging_error_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'packaging-error'</span><span class="p">),</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>            <span class="s1">'twisted_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'twisted-meat'</span><span class="p">),</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>            <span class="s1">'unsealed_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'unsealed'</span><span class="p">),</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>            <span class="s1">'wrinkle_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'wrinkle'</span><span class="p">),</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>            <span class="s1">'severity_score'</span><span class="p">:</span> <span class="p">(</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>                <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">)</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>                <span class="k">if</span> <span class="n">anns</span> <span class="k">else</span> <span class="mi">0</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a>            <span class="p">),</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a>        <span class="p">}</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a>        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -160,77 +146,54 @@ counts (model inputs) and a continuous <code>severity_score</code> (the target).
 </span><span id="build_feature_table-25"><a href="#build_feature_table-25"><span class="linenos">25</span></a><span class="sd">    pandas.DataFrame</span>
 </span><span id="build_feature_table-26"><a href="#build_feature_table-26"><span class="linenos">26</span></a><span class="sd">        One row per image, with per-class defect counts as input features</span>
 </span><span id="build_feature_table-27"><a href="#build_feature_table-27"><span class="linenos">27</span></a><span class="sd">        and a continuous 'severity_score' target column.</span>
-</span><span id="build_feature_table-28"><a href="#build_feature_table-28"><span class="linenos">28</span></a>
-</span><span id="build_feature_table-29"><a href="#build_feature_table-29"><span class="linenos">29</span></a><span class="sd">    Raises</span>
-</span><span id="build_feature_table-30"><a href="#build_feature_table-30"><span class="linenos">30</span></a><span class="sd">    ------</span>
-</span><span id="build_feature_table-31"><a href="#build_feature_table-31"><span class="linenos">31</span></a><span class="sd">    KeyError</span>
-</span><span id="build_feature_table-32"><a href="#build_feature_table-32"><span class="linenos">32</span></a><span class="sd">        If an annotation's category_id is not in ``categories``.</span>
-</span><span id="build_feature_table-33"><a href="#build_feature_table-33"><span class="linenos">33</span></a><span class="sd">    """</span>
-</span><span id="build_feature_table-34"><a href="#build_feature_table-34"><span class="linenos">34</span></a>    <span class="c1"># Start from the image list so images with no annotations still get a row.</span>
-</span><span id="build_feature_table-35"><a href="#build_feature_table-35"><span class="linenos">35</span></a>    <span class="n">image_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">img</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]:</span> <span class="n">img</span><span class="p">[</span><span class="s1">'file_name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'images'</span><span class="p">]}</span>
-</span><span id="build_feature_table-36"><a href="#build_feature_table-36"><span class="linenos">36</span></a>
-</span><span id="build_feature_table-37"><a href="#build_feature_table-37"><span class="linenos">37</span></a>    <span class="c1"># Group annotations by image so each image's boxes are counted together.</span>
-</span><span id="build_feature_table-38"><a href="#build_feature_table-38"><span class="linenos">38</span></a>    <span class="n">anns_by_image</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
-</span><span id="build_feature_table-39"><a href="#build_feature_table-39"><span class="linenos">39</span></a>    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'annotations'</span><span class="p">]:</span>
-</span><span id="build_feature_table-40"><a href="#build_feature_table-40"><span class="linenos">40</span></a>        <span class="n">anns_by_image</span><span class="p">[</span><span class="n">ann</span><span class="p">[</span><span class="s1">'image_id'</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
-</span><span id="build_feature_table-41"><a href="#build_feature_table-41"><span class="linenos">41</span></a>
-</span><span id="build_feature_table-42"><a href="#build_feature_table-42"><span class="linenos">42</span></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="build_feature_table-43"><a href="#build_feature_table-43"><span class="linenos">43</span></a>    <span class="k">for</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">image_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="build_feature_table-44"><a href="#build_feature_table-44"><span class="linenos">44</span></a>        <span class="c1"># An image with no annotations gets an empty list, not a missing key.</span>
-</span><span id="build_feature_table-45"><a href="#build_feature_table-45"><span class="linenos">45</span></a>        <span class="n">anns</span> <span class="o">=</span> <span class="n">anns_by_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="p">[])</span>
-</span><span id="build_feature_table-46"><a href="#build_feature_table-46"><span class="linenos">46</span></a>        <span class="c1"># Convert ids to class names; an unknown id raises KeyError instead of</span>
-</span><span id="build_feature_table-47"><a href="#build_feature_table-47"><span class="linenos">47</span></a>        <span class="c1"># being silently ignored.</span>
-</span><span id="build_feature_table-48"><a href="#build_feature_table-48"><span class="linenos">48</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s1">'category_id'</span><span class="p">]]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">]</span>
-</span><span id="build_feature_table-49"><a href="#build_feature_table-49"><span class="linenos">49</span></a>
-</span><span id="build_feature_table-50"><a href="#build_feature_table-50"><span class="linenos">50</span></a>        <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="build_feature_table-51"><a href="#build_feature_table-51"><span class="linenos">51</span></a>            <span class="s1">'image'</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
-</span><span id="build_feature_table-52"><a href="#build_feature_table-52"><span class="linenos">52</span></a>            <span class="s1">'split'</span><span class="p">:</span> <span class="n">split_name</span><span class="p">,</span>
-</span><span id="build_feature_table-53"><a href="#build_feature_table-53"><span class="linenos">53</span></a>            <span class="s1">'num_detections'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">),</span>
-</span><span id="build_feature_table-54"><a href="#build_feature_table-54"><span class="linenos">54</span></a>            <span class="s1">'loose_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'loose-meat'</span><span class="p">),</span>
-</span><span id="build_feature_table-55"><a href="#build_feature_table-55"><span class="linenos">55</span></a>            <span class="s1">'packaging_error_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'packaging-error'</span><span class="p">),</span>
-</span><span id="build_feature_table-56"><a href="#build_feature_table-56"><span class="linenos">56</span></a>            <span class="s1">'twisted_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'twisted-meat'</span><span class="p">),</span>
-</span><span id="build_feature_table-57"><a href="#build_feature_table-57"><span class="linenos">57</span></a>            <span class="s1">'unsealed_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'unsealed'</span><span class="p">),</span>
-</span><span id="build_feature_table-58"><a href="#build_feature_table-58"><span class="linenos">58</span></a>            <span class="s1">'wrinkle_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'wrinkle'</span><span class="p">),</span>
-</span><span id="build_feature_table-59"><a href="#build_feature_table-59"><span class="linenos">59</span></a>            <span class="c1"># Severity is the MEAN box area in pixels^2, not the total (mean</span>
-</span><span id="build_feature_table-60"><a href="#build_feature_table-60"><span class="linenos">60</span></a>            <span class="c1"># scored better in the branch experiment). A COCO bbox is</span>
-</span><span id="build_feature_table-61"><a href="#build_feature_table-61"><span class="linenos">61</span></a>            <span class="c1"># [x, y, width, height], so index 2 * index 3 is the area.</span>
-</span><span id="build_feature_table-62"><a href="#build_feature_table-62"><span class="linenos">62</span></a>            <span class="c1"># No annotations means no defects, so the score is 0.</span>
-</span><span id="build_feature_table-63"><a href="#build_feature_table-63"><span class="linenos">63</span></a>            <span class="s1">'severity_score'</span><span class="p">:</span> <span class="p">(</span>
-</span><span id="build_feature_table-64"><a href="#build_feature_table-64"><span class="linenos">64</span></a>                <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">)</span>
-</span><span id="build_feature_table-65"><a href="#build_feature_table-65"><span class="linenos">65</span></a>                <span class="k">if</span> <span class="n">anns</span> <span class="k">else</span> <span class="mi">0</span>
-</span><span id="build_feature_table-66"><a href="#build_feature_table-66"><span class="linenos">66</span></a>            <span class="p">),</span>
-</span><span id="build_feature_table-67"><a href="#build_feature_table-67"><span class="linenos">67</span></a>        <span class="p">}</span>
-</span><span id="build_feature_table-68"><a href="#build_feature_table-68"><span class="linenos">68</span></a>        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span id="build_feature_table-69"><a href="#build_feature_table-69"><span class="linenos">69</span></a>
-</span><span id="build_feature_table-70"><a href="#build_feature_table-70"><span class="linenos">70</span></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+</span><span id="build_feature_table-28"><a href="#build_feature_table-28"><span class="linenos">28</span></a><span class="sd">    """</span>
+</span><span id="build_feature_table-29"><a href="#build_feature_table-29"><span class="linenos">29</span></a>    <span class="n">image_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">img</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]:</span> <span class="n">img</span><span class="p">[</span><span class="s1">'file_name'</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'images'</span><span class="p">]}</span>
+</span><span id="build_feature_table-30"><a href="#build_feature_table-30"><span class="linenos">30</span></a>
+</span><span id="build_feature_table-31"><a href="#build_feature_table-31"><span class="linenos">31</span></a>    <span class="n">anns_by_image</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+</span><span id="build_feature_table-32"><a href="#build_feature_table-32"><span class="linenos">32</span></a>    <span class="k">for</span> <span class="n">ann</span> <span class="ow">in</span> <span class="n">coco_data</span><span class="p">[</span><span class="s1">'annotations'</span><span class="p">]:</span>
+</span><span id="build_feature_table-33"><a href="#build_feature_table-33"><span class="linenos">33</span></a>        <span class="n">anns_by_image</span><span class="p">[</span><span class="n">ann</span><span class="p">[</span><span class="s1">'image_id'</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span>
+</span><span id="build_feature_table-34"><a href="#build_feature_table-34"><span class="linenos">34</span></a>
+</span><span id="build_feature_table-35"><a href="#build_feature_table-35"><span class="linenos">35</span></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="build_feature_table-36"><a href="#build_feature_table-36"><span class="linenos">36</span></a>    <span class="k">for</span> <span class="n">image_id</span><span class="p">,</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">image_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="build_feature_table-37"><a href="#build_feature_table-37"><span class="linenos">37</span></a>        <span class="n">anns</span> <span class="o">=</span> <span class="n">anns_by_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="build_feature_table-38"><a href="#build_feature_table-38"><span class="linenos">38</span></a>        <span class="n">class_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="s1">'category_id'</span><span class="p">]]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">]</span>
+</span><span id="build_feature_table-39"><a href="#build_feature_table-39"><span class="linenos">39</span></a>
+</span><span id="build_feature_table-40"><a href="#build_feature_table-40"><span class="linenos">40</span></a>        <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="build_feature_table-41"><a href="#build_feature_table-41"><span class="linenos">41</span></a>            <span class="s1">'image'</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+</span><span id="build_feature_table-42"><a href="#build_feature_table-42"><span class="linenos">42</span></a>            <span class="s1">'split'</span><span class="p">:</span> <span class="n">split_name</span><span class="p">,</span>
+</span><span id="build_feature_table-43"><a href="#build_feature_table-43"><span class="linenos">43</span></a>            <span class="s1">'num_detections'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">),</span>
+</span><span id="build_feature_table-44"><a href="#build_feature_table-44"><span class="linenos">44</span></a>            <span class="s1">'loose_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'loose-meat'</span><span class="p">),</span>
+</span><span id="build_feature_table-45"><a href="#build_feature_table-45"><span class="linenos">45</span></a>            <span class="s1">'packaging_error_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'packaging-error'</span><span class="p">),</span>
+</span><span id="build_feature_table-46"><a href="#build_feature_table-46"><span class="linenos">46</span></a>            <span class="s1">'twisted_meat_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'twisted-meat'</span><span class="p">),</span>
+</span><span id="build_feature_table-47"><a href="#build_feature_table-47"><span class="linenos">47</span></a>            <span class="s1">'unsealed_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'unsealed'</span><span class="p">),</span>
+</span><span id="build_feature_table-48"><a href="#build_feature_table-48"><span class="linenos">48</span></a>            <span class="s1">'wrinkle_count'</span><span class="p">:</span> <span class="n">class_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">'wrinkle'</span><span class="p">),</span>
+</span><span id="build_feature_table-49"><a href="#build_feature_table-49"><span class="linenos">49</span></a>            <span class="s1">'severity_score'</span><span class="p">:</span> <span class="p">(</span>
+</span><span id="build_feature_table-50"><a href="#build_feature_table-50"><span class="linenos">50</span></a>                <span class="nb">sum</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="s1">'bbox'</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">anns</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">anns</span><span class="p">)</span>
+</span><span id="build_feature_table-51"><a href="#build_feature_table-51"><span class="linenos">51</span></a>                <span class="k">if</span> <span class="n">anns</span> <span class="k">else</span> <span class="mi">0</span>
+</span><span id="build_feature_table-52"><a href="#build_feature_table-52"><span class="linenos">52</span></a>            <span class="p">),</span>
+</span><span id="build_feature_table-53"><a href="#build_feature_table-53"><span class="linenos">53</span></a>        <span class="p">}</span>
+</span><span id="build_feature_table-54"><a href="#build_feature_table-54"><span class="linenos">54</span></a>        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="build_feature_table-55"><a href="#build_feature_table-55"><span class="linenos">55</span></a>
+</span><span id="build_feature_table-56"><a href="#build_feature_table-56"><span class="linenos">56</span></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>Convert one split's COCO annotation data into a per-image feature table.</p>
 
-<h6 id="parameters">Parameters</h6>
+<h2 id="parameters">Parameters</h2>
 
-<ul>
-<li><strong>coco_data</strong> (dict):
-Parsed COCO-format annotation data for one split.</li>
-<li><strong>split_name</strong> (str):
-Label recorded in the output table's 'split' column.</li>
-<li><strong>categories</strong> (dict):
-Mapping of category_id -> class name.</li>
-</ul>
+<p>coco_data : dict
+    Parsed COCO-format annotation data for one split.
+split_name : str
+    Label recorded in the output table's 'split' column.
+categories : dict
+    Mapping of category_id -> class name.</p>
 
-<h6 id="returns">Returns</h6>
+<h2 id="returns">Returns</h2>
 
-<ul>
-<li><strong>pandas.DataFrame</strong>: One row per image, with per-class defect counts as input features
-and a continuous 'severity_score' target column.</li>
-</ul>
-
-<h6 id="raises">Raises</h6>
-
-<ul>
-<li><strong>KeyError</strong>: If an annotation's category_id is not in <code>categories</code>.</li>
-</ul>
+<p>pandas.DataFrame
+    One row per image, with per-class defect counts as input features
+    and a continuous 'severity_score' target column.</p>
 </div>
 
 

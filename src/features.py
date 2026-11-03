@@ -24,26 +24,16 @@ def build_feature_table(coco_data, split_name, categories):
     pandas.DataFrame
         One row per image, with per-class defect counts as input features
         and a continuous 'severity_score' target column.
-
-    Raises
-    ------
-    KeyError
-        If an annotation's category_id is not in ``categories``.
     """
-    # Start from the image list so images with no annotations still get a row.
     image_info = {img['id']: img['file_name'] for img in coco_data['images']}
 
-    # Group annotations by image so each image's boxes are counted together.
     anns_by_image = defaultdict(list)
     for ann in coco_data['annotations']:
         anns_by_image[ann['image_id']].append(ann)
 
     rows = []
     for image_id, file_name in image_info.items():
-        # An image with no annotations gets an empty list, not a missing key.
         anns = anns_by_image.get(image_id, [])
-        # Convert ids to class names; an unknown id raises KeyError instead of
-        # being silently ignored.
         class_names = [categories[a['category_id']] for a in anns]
 
         row = {
@@ -55,10 +45,6 @@ def build_feature_table(coco_data, split_name, categories):
             'twisted_meat_count': class_names.count('twisted-meat'),
             'unsealed_count': class_names.count('unsealed'),
             'wrinkle_count': class_names.count('wrinkle'),
-            # Severity is the MEAN box area in pixels^2, not the total (mean
-            # scored better in the branch experiment). A COCO bbox is
-            # [x, y, width, height], so index 2 * index 3 is the area.
-            # No annotations means no defects, so the score is 0.
             'severity_score': (
                 sum(a['bbox'][2] * a['bbox'][3] for a in anns) / len(anns)
                 if anns else 0
